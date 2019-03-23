@@ -1,9 +1,11 @@
 require 'em/pure_ruby'
 require 'em-websocket'
 require 'rx'
+require 'rufus-scheduler'
 
 EM.run do
   messages = []
+  @scheduler = Rufus::Scheduler.singleton
 
   EM::WebSocket.run(host: '0.0.0.0', port: 8080) do |ws|
 
@@ -28,6 +30,8 @@ EM.run do
 
       # Publish message to the client
       ws.send "Hello Client, you connected to #{handshake.path}"
+
+      @ws = ws
     end
 
     ws.onclose do
@@ -40,7 +44,15 @@ EM.run do
       messages << msg
       ws.send "Pong: #{msg}"
     end
+
+    @ws = ws
   end
+
+  @scheduler.every '3s' do
+    @ws.send "scheduler message #{Time.now}" if @ws
+  end
+
+
 
   puts 'Server Started'
 end

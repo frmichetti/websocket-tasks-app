@@ -1,75 +1,133 @@
-<!DOCTYPE html>
-<meta charset="utf-8"/>
-<title>WebSocket Test</title>
-<script language="javascript" type="text/javascript">
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    var wsUri = "ws://localhost:8080/";
-    var output;
-    var textMessage = '';
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    function init() {
-        output = document.getElementById("output");
-        testWebSocket();
-    }
+    <title>WebSocket Test</title>
+    <script language="javascript" type="text/javascript">
 
-    function testWebSocket() {
-        websocket = new WebSocket(wsUri);
-        websocket.onopen = function (evt) {
-            onOpen(evt)
-        };
-        websocket.onclose = function (evt) {
-            onClose(evt)
-        };
-        websocket.onmessage = function (evt) {
-            onMessage(evt)
-        };
-        websocket.onerror = function (evt) {
-            onError(evt)
-        };
-    }
+        var wsUri = "ws://localhost:8080/";
+        var output;
+        var textMessage = '';
+        var firstTime = true;
 
-    function onOpen(evt) {
-        writeToScreen("CONNECTED");
-        doSend("WebSocket test");
-    }
+        function init() {
+            output = document.getElementById("output");
+            testWebSocket();
+        }
 
-    function onClose(evt) {
-        writeToScreen("DISCONNECTED");
-    }
+        function testWebSocket() {
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function (evt) {
+                onOpen(evt)
+            };
+            websocket.onclose = function (evt) {
+                onClose(evt)
+            };
+            websocket.onmessage = function (evt) {
+                onMessage(evt)
+            };
+            websocket.onerror = function (evt) {
+                onError(evt)
+            };
+        }
 
-    function onMessage(evt) {
-        writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
-       //  websocket.close();
-    }
+        function onOpen(evt) {
+            firstTime = true;
+            writeToScreen('<div class="alert alert-secondary alert-dismissible fade show" role="alert">' + 'CONNECTED' + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+            doSend("WebSocket test");
+        }
 
-    function onError(evt) {
-        var errorMessage = evt.data ? evt.data : 'Error on contact WS Server';
-        writeToScreen('<span style="color: red;">ERROR:</span> ' + errorMessage);
-    }
+        function onClose(evt) {
+            writeToScreen('<div class="alert alert-secondary alert-dismissible fade show" role="alert">' + 'DISCONNECTED' + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+        }
 
-    function doSend(message) {
-        writeToScreen("SENT: " + message);
-        websocket.send(message);
-    }
+        function onMessage(evt) {
+            writeToScreen('<div class="alert alert-info" role="alert"> SERVER: ' + evt.data + '</div>');
+            firstTime = false;
+            scrollDown();
+            //  websocket.close();
+        }
 
-    function writeToScreen(message) {
-        var pre = document.createElement("p");
-        pre.style.wordWrap = "break-word";
-        pre.innerHTML = message;
-        output.appendChild(pre);
-    }
+        function onError(evt) {
+            var errorMessage = evt.data ? evt.data : 'Error on contact WS Server';
+            writeToScreen('<div class="alert alert-danger alert-dismissible fade show" role="alert"> ERROR:' + errorMessage + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+        }
 
-    function OnTextChange(event) {
-        textMessage = event.target.value;
-    }
+        function doSend(message) {
+            if (message && message !== ''){
+                websocket.send(message);
+                writeToScreen('<div class="alert alert-success" role="alert">CLIENT: Ping: ' + message + '</div>');
+                $('form > input').val('');
+                textMessage = '';
+            }
+        }
 
-    window.addEventListener("load", init, false);
+        function writeToScreen(message) {
+            var pre = document.createElement("p");
+            pre.style.wordWrap = "break-word";
+            pre.innerHTML = message;
+            output.appendChild(pre);
+        }
 
+        function OnTextChange(event) {
+            textMessage = event.target.value;
+        }
+
+        function scrollDown() {
+            window.scrollBy(0, 1000);
+        }
+
+        window.addEventListener("load", init, false);
+    </script>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">WebSocket Test</a>
+    <form class="form-inline" id="form">
+        <input class="form-control mr-sm-2" type="text" placeholder="Message" aria-label="Message" onchange="OnTextChange(event)">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" onclick="doSend(textMessage)">Send</button>
+    </form>
+</nav>
+
+
+<div class="container" style="margin-top: 15px">
+
+    <div class="row">
+        <h2>WebSocket Test</h2>
+    </div>
+
+    <div class="row">
+        <div id="output" style="width: 100%"></div>
+    </div>
+
+</div>
+
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+<script>
+    $(function() {
+        console.log( "ready!" );
+        $('form').submit(false);
+    });
 </script>
-
-<h2>WebSocket Test</h2>
-
-<input type="text" id="text" onchange="OnTextChange(event)" />
-<button title="Send" onclick="doSend(textMessage)">Send</button>
-
-<div id="output"></div>
+</body>
+</html>
