@@ -4,15 +4,16 @@ require 'rx'
 require 'rufus-scheduler'
 
 EM.run do
-  messages = []
+  @messages = []
   @scheduler = Rufus::Scheduler.singleton
 
-  times = 1
-  amount = 1
+  @paused = false
+  @times = 1
+  @amount = 1
 
   EM::WebSocket.run(host: '0.0.0.0', port: 8080) do |ws|
 
-    source = Rx::Observable.from_array(messages)
+    source = Rx::Observable.from_array(@messages)
     subscription = source.subscribe(
         lambda {|x|
           puts 'Next: ' + x.to_s
@@ -46,12 +47,16 @@ EM.run do
       puts "Received message: #{msg}"
 
       if msg.eql? 'reset'
-        times = 1
-        amount = 1
+        @times = 1
+        @amount = 1
         ws.send "Pong: #{'ok - resetting count'}"
+      elsif msg.eql? 'pause'
+        @paused = !@paused
+        puts 'Paused ? ', @paused
+        ws.send @paused ? "Pong: #{'shhhhhhhhhh'}" : "Pong: #{'counting ...'}"
       else
-        messages << msg
-        ws.send "Pong: #{msg}"
+          @messages << msg
+          ws.send "Pong: #{msg}"
       end
     end
 
@@ -65,22 +70,24 @@ EM.run do
     #
 
     if @ws
-      if amount == 1
-        @ws.send("#{amount} elefante incomoda muita gente!")
-      else
-        if amount % 2 == 0
-          disturb = ""
-          i = 0
-          for i in i..times do
-            disturb += "incomodam "
-          end
-          @ws.send("#{amount} elefantes #{disturb}muito mais!")
+      unless @paused
+        if @amount == 1
+          @ws.send("#{@amount} elefante incomoda muita gente!")
         else
-          @ws.send("#{amount} elefantes incomodam muita gente!")
+          if @amount % 2 == 0
+            disturb = ""
+            i = 0
+            for i in i..@times do
+              disturb += "incomodam "
+            end
+            @ws.send("#{@amount} elefantes #{disturb}muito mais!")
+          else
+            @ws.send("#{@amount} elefantes incomodam muita gente!")
+          end
         end
+        @amount+=1
+        @times+=1
       end
-      amount+=1
-      times+=1
     end
   end
 
