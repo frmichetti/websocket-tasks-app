@@ -48,11 +48,32 @@ EM.run do
     @ws = ws
   end
 
-  @scheduler.every '3s' do
-    @ws.send "scheduler message #{Time.now}" if @ws
+  vezes = 1
+  qtd = 1
+
+  @scheduler.every '2s' do
+    # @ws.send "scheduler message #{Time.now}" if @ws
+    #
+
+    if @ws
+      if qtd == 1
+        @ws.send("#{qtd} elefante incomoda muita gente!")
+      else
+        if qtd % 2 == 0
+          incomoda = ""
+          i = 0
+          for i in i..vezes do
+            incomoda += "incomodam "
+          end
+          @ws.send("#{qtd} elefantes #{incomoda}muito mais!")
+        else
+          @ws.send("#{qtd} elefantes incomodam muita gente!")
+        end
+      end
+      qtd+=1
+      vezes+=1
+    end
   end
-
-
 
   puts 'Server Started'
 end
