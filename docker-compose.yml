@@ -3,11 +3,13 @@ services:
   ruby:
     image: ruby:latest
     container_name: 'elefantinhos-ws'
-    command: bash -c 'gem install bundler && bundle install && ruby server.rb'
+    command: bash -c 'gem install bundler && bundle install && rackup -p 9292 && ruby server.rb'
     working_dir: /usr/app/
     volumes:
       - ./:/usr/app/
     ports:
       - "8080:8080"
+      - "9292:9292"
     expose:
       - "8080"
+      - "9292"

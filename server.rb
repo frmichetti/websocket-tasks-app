@@ -95,3 +95,5 @@ class MyWebSocket
     end
   end
 end
+
+run MyWebSocket.new
