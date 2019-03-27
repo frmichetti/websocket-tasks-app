@@ -2,6 +2,7 @@ version: '3'
 services:
   ruby:
     image: ruby:latest
+    container_name: 'elefantinhos-ws'
     command: bash -c 'gem install bundler && bundle install && ruby server.rb'
     working_dir: /usr/app/
     volumes:
